@@ -4,16 +4,17 @@ GenRandom: ; 0x959
 	push hl
 	ld a, [wRNGPointer]
 	ld c, a
-	ld b, $0 ;load ??? into c
+	ld b, $0
 	inc a
-	cp 54 + 1 ;inc ???, if ??? is 55 do alot of subtraction and make ??? 0
+	cp 54 + 1
 	jr nz, .asm_96e
+	; We've reached the end of the array, reroll the RNG and loop back to the start.
 	call UpdateRNG
 	xor a
 	ld bc, $0000
 .asm_96e
-	ld [wRNGPointer], a ;place wRNGPointer + 1 back in
-	ld hl, wRNGValues ;choose number generated based on wRNGPointer and all the subtraction
+	ld [wRNGPointer], a
+	ld hl, wRNGValues
 	add hl, bc
 	ld a, [hl]
 	pop hl
@@ -110,7 +111,7 @@ UpdateRNG: ; 0x9fa
 	ret
 
 RandomRange: ; 0xa21
-; Random value 0 <= x < a
+; Random value 0 <= x <= a with bias against 0 and a
 	push bc
 	push hl
 	ld c, a
