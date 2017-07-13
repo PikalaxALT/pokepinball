@@ -25,7 +25,6 @@ GenRandom: ; 0x959
 ResetRNG: ; 0x97a
 	ld a, [wRNGModulus]
 	ld d, a
-	ld a, $0 ; wasted instruction (debug that was never commented out?)
 	; [wRNGSub] = [sRNGMod] % [wRNGModulus]
 	ld a, [sRNGMod]
 .modulo
@@ -64,7 +63,6 @@ ResetRNG: ; 0x97a
 	call UpdateRNG
 	call UpdateRNG
 	call UpdateRNG
-	ld a, $0 ; wasted instruction (debug that was never commented out?)
 	call GenRandom
 	ld [sRNGMod], a
 	ret
@@ -79,9 +77,7 @@ ResetRNG: ; 0x97a
 	db $1e, $33, $11, $26, $04, $19, $2e, $0c, $21
 
 UpdateRNG: ; 0x9fa
-; Adjusts two RNG values using wRNGModulus
-; Should be updating the whole range.
-; Uncomment the two `inc bc` instructions to get the more random effect.
+; Adjusts the RNG values using wRNGModulus
 	ld a, [wRNGModulus]
 	ld d, a
  ; [d812] = ([d812] - 24 * [d831]) % [d810]
@@ -95,7 +91,7 @@ UpdateRNG: ; 0x9fa
 	add d
 .no_carry
 	ld [bc], a
-	; inc bc
+	inc bc
 	dec e
 	jr nz, .loop
  ; [d82a] = ([d82a] - 31 * [d812]) % [d810]
@@ -109,7 +105,7 @@ UpdateRNG: ; 0x9fa
 	add d
 .no_carry2
 	ld [bc], a
-	; inc bc
+	inc bc
 	dec e
 	jr nz, .loop2
 	ret
@@ -117,27 +113,13 @@ UpdateRNG: ; 0x9fa
 RandomRange: ; 0xa21
 ; Random value 0 <= x <= a with bias against 0 and a
 	push bc
-	push hl
-	ld c, a
-	ld b, $0
-	ld hl, .Data
-	add hl, bc
-	ld l, [hl]
+	rlca
+	ld b, a
 	call GenRandom
-	call HorrendousMultiplyAbyL
-	inc h
-	srl h
-	ld a, h
-	pop hl
+	ld c, a
+	call MultiplyBbyCUnsigned
+	inc b
+	srl b
+	ld a, b
 	pop bc
 	ret
-
-.Data
-; The first 128 bytes are the first 128 even numbers starting at 0.
-; The next 128 bytes are the first 128 odd numbers starting at 1.
-; The (a)th element is essentially what you'd get from `rlca`.
-x = 0
-REPT 128
-	db x | ((x >> 7) & 1)
-x = x + 2
-ENDR
