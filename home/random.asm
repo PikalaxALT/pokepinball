@@ -40,7 +40,7 @@ ResetRNG: ; 0x97a
 	ld e, $1
 	ld hl, .Data
 	ld a, 54
-.copy_prng
+.init_prng
 	push af
 	ld c, [hl]
 	inc hl
@@ -60,7 +60,7 @@ ResetRNG: ; 0x97a
 	pop hl
 	pop af
 	dec a
-	jr nz, .copy_prng
+	jr nz, .init_prng
 	call UpdateRNG
 	call UpdateRNG
 	call UpdateRNG
@@ -80,6 +80,8 @@ ResetRNG: ; 0x97a
 
 UpdateRNG: ; 0x9fa
 ; Adjusts two RNG values using wRNGModulus
+; Should be updating the whole range.
+; Uncomment the two `inc bc` instructions to get the more random effect.
 	ld a, [wRNGModulus]
 	ld d, a
  ; [d812] = ([d812] - 24 * [d831]) % [d810]
@@ -93,6 +95,7 @@ UpdateRNG: ; 0x9fa
 	add d
 .no_carry
 	ld [bc], a
+	; inc bc
 	dec e
 	jr nz, .loop
  ; [d82a] = ([d82a] - 31 * [d812]) % [d810]
@@ -106,6 +109,7 @@ UpdateRNG: ; 0x9fa
 	add d
 .no_carry2
 	ld [bc], a
+	; inc bc
 	dec e
 	jr nz, .loop2
 	ret
@@ -116,7 +120,7 @@ RandomRange: ; 0xa21
 	push hl
 	ld c, a
 	ld b, $0
-	ld hl, EvensAndOdds
+	ld hl, .Data
 	add hl, bc
 	ld l, [hl]
 	call GenRandom
@@ -128,10 +132,10 @@ RandomRange: ; 0xa21
 	pop bc
 	ret
 
-EvensAndOdds:
+.Data
 ; The first 128 bytes are the first 128 even numbers starting at 0.
 ; The next 128 bytes are the first 128 odd numbers starting at 1.
-; The (a)th element is essentially what you'd get from rlca.
+; The (a)th element is essentially what you'd get from `rlca`.
 x = 0
 REPT 128
 	db x | ((x >> 7) & 1)
