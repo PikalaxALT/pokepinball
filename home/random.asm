@@ -80,7 +80,7 @@ UpdateRNG: ; 0x9fa
 ; Adjusts the RNG values using wRNGModulus
 	ld a, [wRNGModulus]
 	ld d, a
- ; [d812] = ([d812] - 24 * [d831]) % [d810]
+ ; for i in range(24): [d812+i] = ([d812+i] - [d831]) % [d810]
 	ld bc, wRNGValues
 	ld hl, wRNGValues + $1f
 	ld e, $18
@@ -94,7 +94,7 @@ UpdateRNG: ; 0x9fa
 	inc bc
 	dec e
 	jr nz, .loop
- ; [d82a] = ([d82a] - 31 * [d812]) % [d810]
+ ; for i in range(31): [d82a+i] = ([d82a+i] - [d812]) % [d810]
 	ld bc, wRNGValues + $18 ; d82a
 	ld hl, wRNGValues
 	ld e, $1f
@@ -111,7 +111,7 @@ UpdateRNG: ; 0x9fa
 	ret
 
 RandomRange: ; 0xa21
-; Random value 0 <= x <= a with bias against 0 and a
+; Random value 0 <= x <= a, generated as float rounded to nearest u8
 	push bc
 	rlca
 	ld b, a
