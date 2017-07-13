@@ -785,62 +785,6 @@ INCLUDE "home/random.asm"
 INCLUDE "home/joypad.asm"
 INCLUDE "home/palettes.asm"
 
-HorrendousMultiplyAbyL: ; 0xdd4
-; Return a * l to hl
-; Stupid waste of space
-	push bc
-	ld c, l
-	ld b, $0
-	ld hl, $0000
-	bit 0, a
-	jr z, .asm_de0
-	add hl, bc
-.asm_de0
-	sla c
-	rl b
-	bit 1, a
-	jr z, .asm_de9
-	add hl, bc
-.asm_de9
-	sla c
-	rl b
-	bit 2, a
-	jr z, .asm_df2
-	add hl, bc
-.asm_df2
-	sla c
-	rl b
-	bit 3, a
-	jr z, .asm_dfb
-	add hl, bc
-.asm_dfb
-	sla c
-	rl b
-	bit 4, a
-	jr z, .asm_e04
-	add hl, bc
-.asm_e04
-	sla c
-	rl b
-	bit 5, a
-	jr z, .asm_e0d
-	add hl, bc
-.asm_e0d
-	sla c
-	rl b
-	bit 6, a
-	jr z, .asm_e16
-	add hl, bc
-.asm_e16
-	sla c
-	rl b
-	bit 7, a
-	jr z, .asm_e1f
-	add hl, bc
-.asm_e1f
-	pop bc
-	ret
-
 ConvertHexByteToDecWord: ; 0xe21
 ; Convert the base-16 value in register a into a Binary Coded Decimal (base-10) word.
 ; Example:  If a = $97, de = $0151.
@@ -904,7 +848,7 @@ Modulo_C: ; 0xe55
 
 ToggleAudioEngineUpdateMethod: ; 0xe5d
 ; The audio engine is normally updated once every V-Blank interrupt. However, during pinball gameplay,
-; the LCD is disabled (no V-Blanks) when the pinball is transitioning between the Top- and Bottom-halfs of 
+; the LCD is disabled (no V-Blanks) when the pinball is transitioning between the Top- and Bottom-halfs of
 ; the Red and Blue Fields. Therefore, the audio engine wouldn't get updated for a fraction of a second, which
 ; would has a noticeable pause in the music. To solve this, the Timer interrupt is enabled while the V-Blank is
 ; disabled, and the audio engine gets updated during the Timer interrupt.
